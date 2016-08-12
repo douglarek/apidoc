@@ -40,7 +40,9 @@ func parseDocs(path, tp string) (b []byte, err error) {
 			}
 		}
 	}
-	buf.Truncate(buf.Len() - 1)
+	if c := buf.Len(); c > 0 {
+		buf.Truncate(c - 1)
+	}
 	return buf.Bytes(), nil
 }
 
@@ -48,5 +50,5 @@ func main() {
 	flag.Parse()
 
 	b, _ := parseDocs(path, tp)
-	fmt.Printf("%s\n", b)
+	fmt.Printf("%s", b)
 }
