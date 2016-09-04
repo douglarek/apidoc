@@ -8,6 +8,7 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
+	"strings"
 )
 
 var path, tp string
@@ -17,7 +18,7 @@ func init() {
 	flag.StringVar(&tp, "t", "string", "type")
 }
 
-func parseDocs(path, tp string) (b []byte, err error) {
+func parseDocs(path string, params []string) (b []byte, err error) {
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, path, nil, parser.ParseComments)
 	if err != nil {
@@ -26,17 +27,20 @@ func parseDocs(path, tp string) (b []byte, err error) {
 	var buf bytes.Buffer
 	for _, p := range pkgs {
 		p := doc.New(p, ".", doc.AllDecls)
+	Loop:
 		for _, f := range p.Funcs {
 			if len(f.Doc) > 0 {
 				ps := f.Decl.Type.Params
-				if ps.NumFields() == 1 {
-					for _, i := range ps.List {
-						if types.ExprString(i.Type) == tp {
-							buf.WriteString(f.Doc)
-							buf.WriteString("\n")
-						}
+				if len(params) != len(ps.List) {
+					continue Loop
+				}
+				for i, v := range ps.List {
+					if types.ExprString(v.Type) != params[i] {
+						continue Loop
 					}
 				}
+				buf.WriteString(f.Doc)
+				buf.WriteString("\n")
 			}
 		}
 	}
@@ -49,6 +53,6 @@ func parseDocs(path, tp string) (b []byte, err error) {
 func main() {
 	flag.Parse()
 
-	b, _ := parseDocs(path, tp)
+	b, _ := parseDocs(path, strings.Split(tp, ","))
 	fmt.Printf("%s", b)
 }
