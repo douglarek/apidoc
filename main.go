@@ -53,6 +53,11 @@ func parseDocs(path string, params []string) (b []byte, err error) {
 func main() {
 	flag.Parse()
 
+	if len(flag.Args()) == 0 {
+		flag.Usage()
+		return
+	}
+
 	b, _ := parseDocs(path, strings.Split(tp, ","))
 	fmt.Printf("%s", b)
 }
