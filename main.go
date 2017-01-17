@@ -8,6 +8,7 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
+	"os"
 	"strings"
 )
 
@@ -53,7 +54,7 @@ func parseDocs(path string, params []string) (b []byte, err error) {
 func main() {
 	flag.Parse()
 
-	if len(flag.Args()) == 0 {
+	if len(os.Args) == 1 {
 		flag.Usage()
 		return
 	}
